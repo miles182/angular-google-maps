@@ -56,6 +56,7 @@ angular.module("uiGmapgoogle-maps")
           namespace: "=namespace"
           options: '=options'
           onCreated: '&oncreated'
+          events: '=events'
 
       link: (scope, element, attrs, mapCtrl) =>
         mapCtrl.getScope().deferred.promise.then (map) =>

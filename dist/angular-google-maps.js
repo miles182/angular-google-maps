@@ -1,4 +1,4 @@
-/*! angular-google-maps 2.1.0-SNAPSHOT 2014-11-04
+/*! angular-google-maps 2.1.0-SNAPSHOT 2014-11-07
  *  AngularJS directives for Google Maps
  *  git: https://github.com/angular-ui/angular-google-maps.git
  */
@@ -3475,12 +3475,15 @@ Original idea from: http://stackoverflow.com/questions/22758950/google-map-drawi
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   angular.module("google-maps.directives.api.models.parent".ns()).factory("LayerParentModel".ns(), [
-    "BaseObject".ns(), "Logger".ns(), '$timeout', function(BaseObject, Logger, $timeout) {
+    "BaseObject".ns(), "Logger".ns(), "EventsHelper".ns(), '$timeout', function(BaseObject, Logger, EventsHelper, $timeout) {
       var LayerParentModel;
       LayerParentModel = (function(_super) {
         __extends(LayerParentModel, _super);
 
+        LayerParentModel.include(EventsHelper);
+
         function LayerParentModel(scope, element, attrs, gMap, onLayerCreated, $log) {
+          var eventName, getEventHandler, listeners;
           this.scope = scope;
           this.element = element;
           this.attrs = attrs;
@@ -3493,6 +3496,20 @@ Original idea from: http://stackoverflow.com/questions/22758950/google-map-drawi
             return;
           }
           this.createGoogleLayer();
+          listeners = this.setEvents(this.layer, scope, scope);
+          if (angular.isDefined(scope.events) && scope.events !== null && angular.isObject(scope.events)) {
+            getEventHandler = function(eventName) {
+              return function() {
+                return scope.events[eventName];
+              };
+            };
+            for (eventName in scope.events) {
+              this.$log.info('eventname2 is: ' + eventName);
+              if (scope.events.hasOwnProperty(eventName) && angular.isFunction(scope.events[eventName])) {
+                google.maps.event.addListener(this.layer, eventName, getEventHandler(eventName));
+              }
+            }
+          }
           this.doShow = true;
           if (angular.isDefined(this.attrs.show)) {
             this.doShow = this.scope.show;
@@ -3523,6 +3540,7 @@ Original idea from: http://stackoverflow.com/questions/22758950/google-map-drawi
           })(this), true);
           this.scope.$on("$destroy", (function(_this) {
             return function() {
+              _this.removeEvents(listeners);
               return _this.layer.setMap(null);
             };
           })(this));
@@ -6540,7 +6558,8 @@ This directive creates a new scope.
             type: "=type",
             namespace: "=namespace",
             options: '=options',
-            onCreated: '&oncreated'
+            onCreated: '&oncreated',
+            events: '=events'
           };
         }
 
@@ -6820,7 +6839,7 @@ angular.module('google-maps.wrapped'.ns()).service('GoogleMapsUtilV3'.ns(), func
   return {
     init: _.once(function () {
       //BEGIN REPLACE
-      /*! angular-google-maps 2.1.0-SNAPSHOT 2014-11-04
+      /*! angular-google-maps 2.1.0-SNAPSHOT 2014-11-07
  *  AngularJS directives for Google Maps
  *  git: https://github.com/angular-ui/angular-google-maps.git
  */
