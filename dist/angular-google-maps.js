@@ -3554,6 +3554,9 @@ Original idea from: http://stackoverflow.com/questions/22758950/google-map-drawi
             this.layer = this.attrs.namespace === void 0 ? new google.maps[this.attrs.type]() : new google.maps[this.attrs.namespace][this.attrs.type]();
           } else {
             this.layer = this.attrs.namespace === void 0 ? new google.maps[this.attrs.type](this.scope.options) : new google.maps[this.attrs.namespace][this.attrs.type](this.scope.options);
+            if (this.scope.show) {
+              this.layer.setMap(this.gMap);
+            }
           }
           if ((this.layer != null) && (this.onLayerCreated != null)) {
             fn = this.onLayerCreated(this.scope, this.layer);
