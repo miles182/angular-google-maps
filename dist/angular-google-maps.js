@@ -3496,6 +3496,7 @@ Original idea from: http://stackoverflow.com/questions/22758950/google-map-drawi
             return;
           }
           this.createGoogleLayer();
+          this.$log.info('creating layer with ' + scope.options + ' and show ' + scope.show);
           listeners = this.setEvents(this.layer, scope, scope);
           if (angular.isDefined(scope.events) && scope.events !== null && angular.isObject(scope.events)) {
             getEventHandler = function(eventName) {
@@ -3532,6 +3533,8 @@ Original idea from: http://stackoverflow.com/questions/22758950/google-map-drawi
           this.scope.$watch("options", (function(_this) {
             return function(newValue, oldValue) {
               if (newValue !== oldValue) {
+                _this.layer.setMap(null);
+                _this.layer = null;
                 _this.$log.info('options changed ');
                 return _this.createGoogleLayer();
               }

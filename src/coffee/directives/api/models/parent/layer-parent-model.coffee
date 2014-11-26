@@ -8,7 +8,7 @@ angular.module("google-maps.directives.api.models.parent".ns())
         return
       @createGoogleLayer()
       ##added by ML
-
+      @$log.info('creating layer with '+scope.options+' and show '+scope.show)
       listeners = @setEvents @layer, scope, scope
       #@listener = google.maps.event.addListener @layer, 'click', (event)=>
       #  @$log.info("Click:"+event.infoWindowHtml)
@@ -39,8 +39,8 @@ angular.module("google-maps.directives.api.models.parent".ns())
 
       @scope.$watch("options", (newValue, oldValue) =>
         if newValue isnt oldValue
-          #@layer.setMap null
-          #@layer = null
+          @layer.setMap null
+          @layer = null
           @$log.info('options changed ')
           @createGoogleLayer()
       , true)
