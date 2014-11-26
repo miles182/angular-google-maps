@@ -1,4 +1,4 @@
-/*! angular-google-maps 2.1.0-SNAPSHOT 2014-11-07
+/*! angular-google-maps 2.1.0-SNAPSHOT 2014-11-26
  *  AngularJS directives for Google Maps
  *  git: https://github.com/angular-ui/angular-google-maps.git
  */
@@ -3500,7 +3500,7 @@ Original idea from: http://stackoverflow.com/questions/22758950/google-map-drawi
           if (angular.isDefined(scope.events) && scope.events !== null && angular.isObject(scope.events)) {
             getEventHandler = function(eventName) {
               return function() {
-                return scope.events[eventName];
+                return scope.events[eventName].apply;
               };
             };
             for (eventName in scope.events) {
@@ -3526,15 +3526,6 @@ Original idea from: http://stackoverflow.com/questions/22758950/google-map-drawi
                 } else {
                   return _this.layer.setMap(null);
                 }
-              }
-            };
-          })(this), true);
-          this.scope.$watch("options", (function(_this) {
-            return function(newValue, oldValue) {
-              if (newValue !== oldValue) {
-                _this.layer.setMap(null);
-                _this.layer = null;
-                return _this.createGoogleLayer();
               }
             };
           })(this), true);
@@ -6839,7 +6830,7 @@ angular.module('google-maps.wrapped'.ns()).service('GoogleMapsUtilV3'.ns(), func
   return {
     init: _.once(function () {
       //BEGIN REPLACE
-      /*! angular-google-maps 2.1.0-SNAPSHOT 2014-11-07
+      /*! angular-google-maps 2.1.0-SNAPSHOT 2014-11-26
  *  AngularJS directives for Google Maps
  *  git: https://github.com/angular-ui/angular-google-maps.git
  */

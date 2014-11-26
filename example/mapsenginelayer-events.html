@@ -22,14 +22,16 @@
     </div>
 </div>
 <div class="row-fluid">
-    <ui-gmap-google-map options="map.options" center="map.center" zoom="map.zoom" events="map.events">
-
+    <ui-gmap-google-map options="map.options" center="map.center" zoom="map.zoom" events="map.events" control="map.control">
         <ui-gmap-layer namespace="visualization" type="MapsEngineLayer" events="layer.events" options="layer.mapsEngineLayerOptions" show="layer.show"></ui-gmap-layer>
-
+        <ui-gmap-layer namespace="visualization" type="DynamicMapsEngineLayer" events="dynLayer.events" options="dynLayer.mapsEngineLayerOptions" show="dynLayer.show"></ui-gmap-layer>
     </ui-gmap-google-map>
 <div class="span5" ng-repeat="e in layer.events2">
     <div ng-bind-html="e.infoWindowHtml"></div>
 </div>
+    <button class="btn btn-success" ng-click="refreshMap()">Refresh Map</button>
+    <input name="UseBools" type="checkbox"  ng-model="layer.show" ng-value="layer.show" >Toggle Maps Engine Layer <br/>
+    <input name="UseBools" type="checkbox"   ng-model="dynLayer.show" ng-value="dynLayer.show">Toggle Dynamic Maps Engine Layer <br/>
 </div>
 </div>
 <script src="//cdnjs.cloudflare.com/ajax/libs/bluebird/1.2.2/bluebird.min.js"></script>
