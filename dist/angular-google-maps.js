@@ -3529,6 +3529,14 @@ Original idea from: http://stackoverflow.com/questions/22758950/google-map-drawi
               }
             };
           })(this), true);
+          this.scope.$watch("options", (function(_this) {
+            return function(newValue, oldValue) {
+              if (newValue !== oldValue) {
+                _this.$log.info('options changed ');
+                return _this.createGoogleLayer();
+              }
+            };
+          })(this), true);
           this.scope.$on("$destroy", (function(_this) {
             return function() {
               _this.removeEvents(listeners);
