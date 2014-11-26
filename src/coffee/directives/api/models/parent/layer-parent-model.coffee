@@ -36,13 +36,14 @@ angular.module("google-maps.directives.api.models.parent".ns())
           else
             @layer.setMap null
       , true)
-      #commented the scope watch cause this unloads the layer if we change the clickable option
-      #@scope.$watch("options", (newValue, oldValue) =>
-      #  if newValue isnt oldValue
-      #    @layer.setMap null
-      #    @layer = null
-      #    @createGoogleLayer()
-      #, true)
+
+      @scope.$watch("options", (newValue, oldValue) =>
+        if newValue isnt oldValue
+          #@layer.setMap null
+          #@layer = null
+          @$log.info('options changed ')
+          @createGoogleLayer()
+      , true)
       @scope.$on "$destroy", =>
         @removeEvents listeners
         @layer.setMap null
