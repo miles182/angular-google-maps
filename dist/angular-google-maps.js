@@ -1,4 +1,4 @@
-/*! angular-google-maps 2.1.0-SNAPSHOT 2014-12-05
+/*! angular-google-maps 2.0.7 2014-11-06
  *  AngularJS directives for Google Maps
  *  git: https://github.com/angular-ui/angular-google-maps.git
  */
@@ -1962,6 +1962,26 @@ Nicholas McCready - https://twitter.com/nmccready
 }).call(this);
 
 (function() {
+  angular.module("google-maps.directives.api.utils".ns()).factory("ChromeFixes".ns(), [
+    function() {
+      return {
+        maybeRepaint: function(el) {
+          var od;
+          if (el) {
+            od = el.style.display;
+            el.style.display = 'none';
+            return _.defer(function() {
+              return el.style.display = od;
+            });
+          }
+        }
+      };
+    }
+  ]);
+
+}).call(this);
+
+(function() {
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -2933,7 +2953,7 @@ Original idea from: http://stackoverflow.com/questions/22758950/google-map-drawi
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   angular.module("google-maps.directives.api.models.child".ns()).factory("WindowChildModel".ns(), [
-    "BaseObject".ns(), "GmapUtil".ns(), "Logger".ns(), "$compile", "$http", "$templateCache", function(BaseObject, GmapUtil, $log, $compile, $http, $templateCache) {
+    "BaseObject".ns(), "GmapUtil".ns(), "Logger".ns(), "$compile", "$http", "$templateCache", 'uiGmapChromeFixes', function(BaseObject, GmapUtil, $log, $compile, $http, $templateCache, ChromeFixes) {
       var WindowChildModel;
       WindowChildModel = (function(_super) {
         __extends(WindowChildModel, _super);
@@ -3145,10 +3165,23 @@ Original idea from: http://stackoverflow.com/questions/22758950/google-map-drawi
         };
 
         WindowChildModel.prototype.showWindow = function() {
-          var compiled, templateScope;
+          var compiled, show, templateScope;
           if (this.gWin != null) {
+            show = (function(_this) {
+              return function() {
+                return _.defer(function() {
+                  if (!_this.gWin.isOpen()) {
+                    _this.gWin.open(_this.mapCtrl, _this.getGmarker() ? _this.getGmarker() : void 0);
+                    _this.model.show = _this.gWin.isOpen();
+                    return _.defer(function() {
+                      return ChromeFixes.maybeRepaint(_this.gWin.content);
+                    });
+                  }
+                });
+              };
+            })(this);
             if (this.scope.templateUrl) {
-              $http.get(this.scope.templateUrl, {
+              return $http.get(this.scope.templateUrl, {
                 cache: $templateCache
               }).then((function(_this) {
                 return function(content) {
@@ -3158,7 +3191,8 @@ Original idea from: http://stackoverflow.com/questions/22758950/google-map-drawi
                     templateScope.parameter = _this.scope.templateParameter;
                   }
                   compiled = $compile(content.data)(templateScope);
-                  return _this.gWin.setContent(compiled[0]);
+                  _this.gWin.setContent(compiled[0]);
+                  return show();
                 };
               })(this));
             } else if (this.scope.template) {
@@ -3168,10 +3202,9 @@ Original idea from: http://stackoverflow.com/questions/22758950/google-map-drawi
               }
               compiled = $compile(this.scope.template)(templateScope);
               this.gWin.setContent(compiled[0]);
-            }
-            if (!this.gWin.isOpen()) {
-              this.gWin.open(this.mapCtrl, this.getGmarker() ? this.getGmarker() : void 0);
-              return this.model.show = this.gWin.isOpen();
+              return show();
+            } else {
+              return show();
             }
           }
         };
@@ -3475,15 +3508,12 @@ Original idea from: http://stackoverflow.com/questions/22758950/google-map-drawi
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   angular.module("google-maps.directives.api.models.parent".ns()).factory("LayerParentModel".ns(), [
-    "BaseObject".ns(), "Logger".ns(), "EventsHelper".ns(), '$timeout', function(BaseObject, Logger, EventsHelper, $timeout) {
+    "BaseObject".ns(), "Logger".ns(), '$timeout', function(BaseObject, Logger, $timeout) {
       var LayerParentModel;
       LayerParentModel = (function(_super) {
         __extends(LayerParentModel, _super);
 
-        LayerParentModel.include(EventsHelper);
-
         function LayerParentModel(scope, element, attrs, gMap, onLayerCreated, $log) {
-          var eventName, getEventHandler, listeners;
           this.scope = scope;
           this.element = element;
           this.attrs = attrs;
@@ -3496,21 +3526,6 @@ Original idea from: http://stackoverflow.com/questions/22758950/google-map-drawi
             return;
           }
           this.createGoogleLayer();
-          this.$log.info('creating layer with ' + scope.options + ' and show ' + scope.show);
-          listeners = this.setEvents(this.layer, scope, scope);
-          if (angular.isDefined(scope.events) && scope.events !== null && angular.isObject(scope.events)) {
-            getEventHandler = function(eventName) {
-              return function() {
-                return scope.events[eventName].apply;
-              };
-            };
-            for (eventName in scope.events) {
-              this.$log.info('eventname2 is: ' + eventName);
-              if (scope.events.hasOwnProperty(eventName) && angular.isFunction(scope.events[eventName])) {
-                google.maps.event.addListener(this.layer, eventName, getEventHandler(eventName));
-              }
-            }
-          }
           this.doShow = true;
           if (angular.isDefined(this.attrs.show)) {
             this.doShow = this.scope.show;
@@ -3535,14 +3550,12 @@ Original idea from: http://stackoverflow.com/questions/22758950/google-map-drawi
               if (newValue !== oldValue) {
                 _this.layer.setMap(null);
                 _this.layer = null;
-                _this.$log.info('options changed ');
                 return _this.createGoogleLayer();
               }
             };
           })(this), true);
           this.scope.$on("$destroy", (function(_this) {
             return function() {
-              _this.removeEvents(listeners);
               return _this.layer.setMap(null);
             };
           })(this));
@@ -5394,6 +5407,7 @@ Original idea from: http://stackoverflow.com/questions/22758950/google-map-drawi
 
         Map.prototype.link = function(scope, element, attrs) {
           var unbindCenterWatch;
+          scope.idleAndZoomChanged = false;
           if (scope.center == null) {
             unbindCenterWatch = scope.$watch('center', (function(_this) {
               return function() {
@@ -5568,11 +5582,13 @@ Original idea from: http://stackoverflow.com/questions/22758950/google-map-drawi
                       latitude: ne.lat(),
                       longitude: ne.lng()
                     };
-                    return s.bounds.southwest = {
+                    s.bounds.southwest = {
                       latitude: sw.lat(),
                       longitude: sw.lng()
                     };
                   }
+                  s.zoom = _m.zoom;
+                  return scope.idleAndZoomChanged = !scope.idleAndZoomChanged;
                 });
               });
               if (angular.isDefined(scope.events) && scope.events !== null && angular.isObject(scope.events)) {
@@ -5795,6 +5811,11 @@ Original idea from: http://stackoverflow.com/questions/22758950/google-map-drawi
           })(this);
           return IMarker.mapPromise(scope, ctrl).then((function(_this) {
             return function(map) {
+              var mapScope;
+              mapScope = ctrl.getScope();
+              mapScope.$watch('idleAndZoomChanged', function() {
+                return _.defer(parentModel.gMarkerManager.draw);
+              });
               parentModel = new MarkersParentModel(scope, element, attrs, map);
               return parentModel.existingPieces.then(function() {
                 return ready();
@@ -6560,8 +6581,7 @@ This directive creates a new scope.
             type: "=type",
             namespace: "=namespace",
             options: '=options',
-            onCreated: '&oncreated',
-            events: '=events'
+            onCreated: '&oncreated'
           };
         }
 
@@ -6841,7 +6861,7 @@ angular.module('google-maps.wrapped'.ns()).service('GoogleMapsUtilV3'.ns(), func
   return {
     init: _.once(function () {
       //BEGIN REPLACE
-      /*! angular-google-maps 2.1.0-SNAPSHOT 2014-12-05
+      /*! angular-google-maps 2.0.7 2014-11-06
  *  AngularJS directives for Google Maps
  *  git: https://github.com/angular-ui/angular-google-maps.git
  */
@@ -10213,6 +10233,30 @@ angular.module('google-maps.extensions'.ns()).service('ExtendMarkerClusterer'.ns
               }
               return this;
             }).apply(obj1, [obj2]);
+          };
+
+          NgMapMarkerClusterer.prototype.onAdd = function() {
+            var cMarkerClusterer = this;
+
+            this.activeMap_ = this.getMap();
+            this.ready_ = true;
+
+            this.repaint();
+
+            // Add the map event listeners
+            this.listeners_ = [
+                google.maps.event.addListener(this.getMap(), "zoom_changed", function () {
+                    cMarkerClusterer.resetViewport_(false);
+                    // Workaround for this Google bug: when map is at level 0 and "-" of
+                    // zoom slider is clicked, a "zoom_changed" event is fired even though
+                    // the map doesn't zoom out any further. In this situation, no "idle"
+                    // event is triggered so the cluster markers that have been removed
+                    // do not get redrawn. Same goes for a zoom in at maxZoom.
+                    if (this.getZoom() === (this.get("minZoom") || 0) || this.getZoom() === this.get("maxZoom")) {
+                        google.maps.event.trigger(this, "idle");
+                    }
+                })
+            ];
           };
 
           return NgMapMarkerClusterer;
