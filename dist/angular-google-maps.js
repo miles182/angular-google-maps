@@ -1,4 +1,4 @@
-/*! angular-google-maps 2.0.12 2015-01-21
+/*! angular-google-maps 2.0.12 2015-01-27
  *  AngularJS directives for Google Maps
  *  git: https://github.com/angular-ui/angular-google-maps.git
  */
@@ -3897,12 +3897,15 @@ Original idea from: http://stackoverflow.com/questions/22758950/google-map-drawi
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   angular.module('uiGmapgoogle-maps.directives.api.models.parent').factory('uiGmapLayerParentModel', [
-    'uiGmapBaseObject', 'uiGmapLogger', '$timeout', function(BaseObject, Logger, $timeout) {
+    'uiGmapBaseObject', 'uiGmapLogger', '$timeout', 'uiGmapEventsHelper', function(BaseObject, Logger, $timeout, EventsHelper) {
       var LayerParentModel;
       LayerParentModel = (function(_super) {
         __extends(LayerParentModel, _super);
 
+        LayerParentModel.include(EventsHelper);
+
         function LayerParentModel(scope, element, attrs, gMap, onLayerCreated, $log) {
+          var eventName, getEventHandler, listeners;
           this.scope = scope;
           this.element = element;
           this.attrs = attrs;
@@ -3915,6 +3918,21 @@ Original idea from: http://stackoverflow.com/questions/22758950/google-map-drawi
             return;
           }
           this.createGoogleLayer();
+          this.$log.error('creating layer with ' + scope.options + ' and show ' + scope.show);
+          listeners = this.setEvents(this.gObject, scope, scope);
+          if (angular.isDefined(scope.events) && scope.events !== null && angular.isObject(scope.events)) {
+            getEventHandler = function(eventName) {
+              return function() {
+                return scope.events[eventName].apply;
+              };
+            };
+            for (eventName in scope.events) {
+              this.$log.info('eventname2 is: ' + eventName);
+              if (scope.events.hasOwnProperty(eventName) && angular.isFunction(scope.events[eventName])) {
+                google.maps.event.addListener(this.gObject, eventName, getEventHandler(eventName));
+              }
+            }
+          }
           this.doShow = true;
           if (angular.isDefined(this.attrs.show)) {
             this.doShow = this.scope.show;
@@ -3934,17 +3952,19 @@ Original idea from: http://stackoverflow.com/questions/22758950/google-map-drawi
               }
             };
           })(this), true);
-          this.scope.$watch('options', (function(_this) {
+          this.scope.$watch("options", (function(_this) {
             return function(newValue, oldValue) {
               if (newValue !== oldValue) {
                 _this.gObject.setMap(null);
                 _this.gObject = null;
+                _this.$log.info('options changed ');
                 return _this.createGoogleLayer();
               }
             };
           })(this), true);
-          this.scope.$on('$destroy', (function(_this) {
+          this.scope.$on("$destroy", (function(_this) {
             return function() {
+              _this.removeEvents(listeners);
               return _this.gObject.setMap(null);
             };
           })(this));
@@ -7310,7 +7330,8 @@ This directive creates a new scope.
             type: '=type',
             namespace: '=namespace',
             options: '=options',
-            onCreated: '&oncreated'
+            onCreated: '&oncreated',
+            events: '=events'
           };
         }
 

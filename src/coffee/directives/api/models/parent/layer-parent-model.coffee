@@ -1,5 +1,5 @@
 angular.module('uiGmapgoogle-maps.directives.api.models.parent')
-.factory 'uiGmapLayerParentModel', ['uiGmapBaseObject', 'uiGmapLogger', '$timeout', (BaseObject, Logger, $timeout) ->
+.factory 'uiGmapLayerParentModel', ['uiGmapBaseObject', 'uiGmapLogger', '$timeout','uiGmapEventsHelper', (BaseObject, Logger, $timeout,EventsHelper) ->
   class LayerParentModel extends BaseObject
     @include EventsHelper
     constructor: (@scope, @element, @attrs, @gMap, @onLayerCreated = undefined, @$log = Logger) ->
@@ -8,8 +8,8 @@ angular.module('uiGmapgoogle-maps.directives.api.models.parent')
         return
       @createGoogleLayer()
 
-      @$log.info('creating layer with '+scope.options+' and show '+scope.show)
-      listeners = @setEvents @layer, scope, scope
+      @$log.error('creating layer with '+scope.options+' and show '+scope.show)
+      listeners = @setEvents @gObject, scope, scope
       #@listener = google.maps.event.addListener @layer, 'click', (event)=>
       #  @$log.info("Click:"+event.infoWindowHtml)
       #myevents event
@@ -20,7 +20,7 @@ angular.module('uiGmapgoogle-maps.directives.api.models.parent')
             scope.events[eventName].apply#scope, [@layer, eventName, arguments]
         for eventName of scope.events
           @$log.info('eventname2 is: '+eventName)
-          google.maps.event.addListener @layer, eventName, getEventHandler(eventName)  if scope.events.hasOwnProperty(eventName) and angular.isFunction(scope.events[eventName])
+          google.maps.event.addListener @gObject, eventName, getEventHandler(eventName)  if scope.events.hasOwnProperty(eventName) and angular.isFunction(scope.events[eventName])
       #end
       @doShow = true
 
@@ -36,14 +36,14 @@ angular.module('uiGmapgoogle-maps.directives.api.models.parent')
       , true
       @scope.$watch("options", (newValue, oldValue) =>
         if newValue isnt oldValue
-          @layer.setMap null
-          @layer = null
+          @gObject.setMap null
+          @gObject = null
           @$log.info('options changed ')
           @createGoogleLayer()
       , true)
       @scope.$on "$destroy", =>
         @removeEvents listeners
-        @layer.setMap null
+        @gObject.setMap null
 
     createGoogleLayer: =>
       unless @attrs.options?
