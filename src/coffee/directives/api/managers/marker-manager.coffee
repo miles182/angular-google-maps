@@ -1,5 +1,6 @@
-angular.module("google-maps.directives.api.managers".ns())
-.factory "MarkerManager".ns(), ["Logger".ns(), "FitHelper".ns(), "PropMap".ns(), (Logger, FitHelper, PropMap) ->
+angular.module("uiGmapgoogle-maps.directives.api.managers")
+.factory "uiGmapMarkerManager", ["uiGmapLogger", "uiGmapFitHelper",
+"uiGmapPropMap", (Logger, FitHelper, PropMap) ->
   class MarkerManager extends FitHelper
     @include FitHelper
     @type = 'MarkerManager'
@@ -16,10 +17,16 @@ angular.module("google-maps.directives.api.managers".ns())
         msg = "gMarker.key undefined and it is REQUIRED!!"
         Logger.error msg
         throw msg
-      exists = (@gMarkers.get gMarker.key)?
+      exists = @gMarkers.get gMarker.key
       if !exists
         @handleOptDraw(gMarker, optDraw, true)
         @gMarkers.put gMarker.key, gMarker
+
+    #if you want flashing as in remove and then re-add use this
+    #otherwise leave the marker in the map and just edit its properties (coords, icon etc)
+    update: (gMarker, optDraw = true) =>
+      @remove gMarker, optDraw
+      @add gMarker, optDraw
 
     addMany: (gMarkers) =>
       gMarkers.forEach (gMarker) =>
@@ -31,12 +38,12 @@ angular.module("google-maps.directives.api.managers".ns())
         @gMarkers.remove gMarker.key
 
     removeMany: (gMarkers)=>
-      @gMarkers.values().forEach (marker) =>
+      gMarkers.forEach (marker) =>
         @remove(marker)
 
     draw: =>
       deletes = []
-      @gMarkers.values().forEach (gMarker) =>
+      @gMarkers.each (gMarker) =>
         unless gMarker.isDrawn
           if gMarker.doAdd
             gMarker.setMap(@gMap)
@@ -49,7 +56,7 @@ angular.module("google-maps.directives.api.managers".ns())
         @remove(gMarker, true)
 
     clear: =>
-      @gMarkers.values().forEach (gMarker) ->
+      @gMarkers.each (gMarker) ->
         gMarker.setMap null
       delete @gMarkers
       @gMarkers = new PropMap()
