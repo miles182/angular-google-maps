@@ -3,25 +3,16 @@
 > AngularJS directives for Google Maps
 
 
-[![Dependencies](https://david-dm.org/angular-ui/angular-google-maps.png)](https://david-dm.org/angular-ui/angular-google-maps)&nbsp; 
-[![Dependencies](https://david-dm.org/angular-ui/angular-google-maps/dev-status.png)](https://david-dm.org/angular-ui/angular-google-maps)&nbsp; 
-Master: [![Build Status](https://travis-ci.org/angular-ui/angular-google-maps.png?branch=master)](https://travis-ci.org/angular-ui/angular-google-maps)
-Develop: [![Build Status](https://travis-ci.org/angular-ui/angular-google-maps.png?branch=develop)](https://travis-ci.org/angular-ui/angular-google-maps)
+[![Dependencies](https://david-dm.org/angular-ui/angular-google-maps.svg)](https://david-dm.org/angular-ui/angular-google-maps)&nbsp; 
+[![Dependencies](https://david-dm.org/angular-ui/angular-google-maps/dev-status.svg)](https://david-dm.org/angular-ui/angular-google-maps)&nbsp; 
+Master: [![Build Status](https://travis-ci.org/angular-ui/angular-google-maps.svg?branch=master)](https://travis-ci.org/angular-ui/angular-google-maps)
+Develop: [![Build Status](https://travis-ci.org/angular-ui/angular-google-maps.svg?branch=develop)](https://travis-ci.org/angular-ui/angular-google-maps)
 
 task board: [![Stories in Ready](https://badge.waffle.io/angular-ui/angular-google-maps.png?label=ready&title=Ready)](https://waffle.io/angular-ui/angular-google-maps)
 
-[![Gitter chat](https://badges.gitter.im/angular-ui/angular-google-maps.png)](https://gitter.im/angular-ui/angular-google-maps)
+[![Gitter chat](https://badges.gitter.im/angular-ui/angular-google-maps.svg)](https://gitter.im/angular-ui/angular-google-maps)
 
 <img src="http://benschwarz.github.io/bower-badges/badge@2x.png?pkgname=angular-google-maps" width="130" height="30">&nbsp;
-
-##Post 1.2.X:
-
-With the minor release of 1.2.0 (which is why it is a minor) there are a few breaking changes:
-
-- all directives are now restricted to ```EA``` see [here](https://docs.angularjs.org/guide/directive) and search for 'restrict'
-- marker directive now requires the attribute ```idkey``` to be defined and it is not optional like markers or windows. This is to prevent unnecessary redraws.
-
-If I have forgotten anything then it can be added here or to the website branch which is responsible for... the website. Feel free to contribute and make pull requests to either.
 
 ## 2.0.X:
 2.0.0 will introduced major changes:
@@ -32,6 +23,30 @@ If I have forgotten anything then it can be added here or to the website branch 
 ## 2.0.7+:
 - Bluebird & JQuery have been removed as dependencies, :clap:
 
+## Things to Come:
+_______________________
+## 2.0.12 maybe 2.0.13
+
+These will probably be close to the last 2.0.X releases. Depending on the severity of the bugs other 2.0.X releases may be necessary.
+
+## 3.0 vs 2.1.X Voting results:
+
+![](https://lh3.googleusercontent.com/-YPPGRRhEVEg/VJhH8lC_YQI/AAAAAAAAbP8/ys3CzWTKTpU/w870-h362-no/Screen%2BShot%2B2014-12-22%2Bat%2B10.36.19%2BAM.png)
+ 
+## 3.0.X
+This release is going to be much stricter in terms of when it will be released and allowed features. It will require more specs and will be focusing on bad bugs, unifying the API. There are more items being discussed internally as well and they will become public discussion soon.
+
+Few items known:
+- **transclusion**: Only the map will be transcluded (no more window or windows in markers). This will de-complicate the api tremendously. This will also make it much easier to have one PluralParentModel for the rest of the parents to use. This *may* be held off for 3.0.X. 
+- **watches**:All directives to be moved to using shallow watches (no equality) and or $watchCollection.
+
+- **drop singular layer directives**: Singular directives while being 'angular', are pretty useless for production and performance unless your size is small. To bring focus to the API our goal for layers (shapes, markers, windows) is to make all of the directives plural.
+
+- **remove many watches**, from pural directives. We may be de-angularizing somethings to aide in speed. This main change will have to do with watches on models itself. Watchers are a pain, not only are they a performance hit, but it also makes the internals of the api less explicit (where watchers guess and figure out what is going on). We are considering using the control to allow models to be explicitly updated, destroyed, and created. See [Polygons](https://github.com/angular-ui/angular-google-maps/blob/master/src/coffee/directives/api/polygons.coffee#L24-L29).
+
+Overall we are thinking making this a more aggressive follow up to 2.1.X on watches where we just abort using many them. This [read](http://gehrcke.de/2014/11/sharing-state-in-angularjs-be-aware-of-watch-issues-and-race-conditions-during-app-initialization/), summarizes it best.
+
+__________________
 ## Getting started
 This is a directive for AngularJS `~1.0.7+, ~1.2.2+`.
 
@@ -48,7 +63,13 @@ To build the library after you made changes, simply run grunt:
 grunt
 ```
 
-If you get errors from `jshint`, just add the `--force` argument.
+If you get errors from `jshint` or specs, just add the `--force` argument.
+
+### Generating SourceMap(s)
+```shell
+grunt mappAll
+```
+This will generate source maps for development (angular-google-maps_dev_mapped.js) (non minified) and source maps to minified (angular-google-maps_dev_mapped.min.js) files. They each have their own corresponding map files.  To get the coinciding source files you will need to copy the generated `/tmp` directory (currently not under scc).
 
 ### Running the example
 To run the example page, just run
@@ -69,7 +90,7 @@ Filing issues:
 - Search open/**closed** issues, src examples (./examples), gitter, and then google plus community! **Again please search!**
 - issues w/ plnkrs get attention quicker
 
-Pull requests more than welcome! If you're adding new features, it would be appreciated if you would provide some docs about the feature. This can be done either by adding a card to our [Trello board](https://trello.com/b/WwTRrkfh/angular-google-maps), forking the website branch and issuing a PR with the updated documentation page, or by opening an issue for us to add the documentation to the site.
+Pull requests more than welcome! If you're adding new features, it would be appreciated if you would provide some docs about the feature. This can be done either by adding a card to our [Waffle.io board](https://waffle.io/angular-ui/angular-google-maps), forking the website branch and issuing a PR with the updated documentation page, or by opening an issue for us to add the documentation to the site.
 
 [Branching Model w Git Flow](http://nvie.com/posts/a-successful-git-branching-model/)
 We are trying to follow the git flow branching model where all bugs that are considered urgent / patches will be pull

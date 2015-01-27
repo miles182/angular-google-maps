@@ -1,7 +1,7 @@
-angular.module("google-maps.directives.api.models.parent".ns())
-.factory "RectangleParentModel".ns(),
-["Logger".ns(),"GmapUtil".ns(),
-"EventsHelper".ns(), "RectangleOptionsBuilder".ns(),
+angular.module('uiGmapgoogle-maps.directives.api.models.parent')
+.factory 'uiGmapRectangleParentModel',
+['uiGmapLogger','uiGmapGmapUtil',
+'uiGmapEventsHelper', 'uiGmapRectangleOptionsBuilder',
 ($log,GmapUtil,
   EventsHelper, Builder) ->
   class RectangleParentModel extends Builder
@@ -23,15 +23,15 @@ angular.module("google-maps.directives.api.models.parent".ns())
             bounds = scope.bounds
         else
           if bound?
-            $log.error "Invalid bounds for newValue: #{JSON.stringify scope.bounds}"
+            $log.error "Invalid bounds for newValue: #{JSON.stringify scope.bounds}" #note if bouds is recursive this could crash
       createBounds()
-      rectangle = new google.maps.Rectangle(@buildOpts bounds)
-      $log.info "rectangle created: #{rectangle}"
+      gObject = new google.maps.Rectangle(@buildOpts bounds)
+      $log.info "gObject (rectangle) created: #{gObject}"
 
       settingBoundsFromScope = false
 
       updateBounds = =>
-        b = rectangle.getBounds()
+        b = gObject.getBounds()
         ne = b.getNorthEast()
         sw = b.getSouthWest()
         #if the scope notified this change then there is no reason
@@ -52,23 +52,23 @@ angular.module("google-maps.directives.api.models.parent".ns())
       init = =>
         fit()
         @removeEvents myListeners
-        myListeners.push google.maps.event.addListener rectangle, "dragstart", ->
+        myListeners.push google.maps.event.addListener gObject, 'dragstart', ->
           dragging = true
-        myListeners.push google.maps.event.addListener rectangle, "dragend", ->
+        myListeners.push google.maps.event.addListener gObject, 'dragend', ->
           dragging = false
           updateBounds()
-        myListeners.push google.maps.event.addListener rectangle, "bounds_changed", ->
+        myListeners.push google.maps.event.addListener gObject, 'bounds_changed', ->
           return if dragging
           updateBounds()
 
       clear = =>
         @removeEvents myListeners
         @removeEvents listeners if listeners?
-        rectangle.setMap null
+        gObject.setMap null
 
       init() if bounds?
       # Update map when center coordinates change
-      scope.$watch "bounds", ((newValue, oldValue) ->
+      scope.$watch 'bounds', ((newValue, oldValue) ->
         return  if _.isEqual(newValue, oldValue) and bounds? or dragging
         settingBoundsFromScope = true
         unless newValue?
@@ -79,7 +79,7 @@ angular.module("google-maps.directives.api.models.parent".ns())
         else
           fit()
         createBounds()
-        rectangle.setBounds bounds
+        gObject.setBounds bounds
         settingBoundsFromScope = false
         init() if isNew and bounds?
       ), true
@@ -87,19 +87,19 @@ angular.module("google-maps.directives.api.models.parent".ns())
       @setMyOptions = (newVals, oldVals) =>
         unless _.isEqual newVals,oldVals
           if bounds? and newVals?
-            rectangle.setOptions @buildOpts bounds
+            gObject.setOptions @buildOpts bounds
 
       @props.push 'bounds'
       @watchProps @props
 
       if attrs.events?
-        listeners = @setEvents rectangle, scope, scope
-        scope.$watch "events", (newValue, oldValue) =>
+        listeners = @setEvents gObject, scope, scope
+        scope.$watch 'events', (newValue, oldValue) =>
           unless _.isEqual newValue, oldValue
             @removeEvents listeners if listeners?
-            listeners = @setEvents rectangle, scope, scope
-      # Remove rectangle on scope $destroy
-      scope.$on "$destroy", =>
+            listeners = @setEvents gObject, scope, scope
+      # Remove gObject on scope $destroy
+      scope.$on '$destroy', =>
         clear()
 
       $log.info @

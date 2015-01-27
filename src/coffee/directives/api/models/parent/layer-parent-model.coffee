@@ -1,13 +1,13 @@
-angular.module("google-maps.directives.api.models.parent".ns())
-.factory "LayerParentModel".ns(), ["BaseObject".ns(), "Logger".ns(), "EventsHelper".ns(), '$timeout',(BaseObject, Logger, EventsHelper, $timeout) ->
+angular.module('uiGmapgoogle-maps.directives.api.models.parent')
+.factory 'uiGmapLayerParentModel', ['uiGmapBaseObject', 'uiGmapLogger', '$timeout', (BaseObject, Logger, $timeout) ->
   class LayerParentModel extends BaseObject
     @include EventsHelper
     constructor: (@scope, @element, @attrs, @gMap, @onLayerCreated = undefined, @$log = Logger) ->
       unless @attrs.type?
-        @$log.info("type attribute for the layer directive is mandatory. Layer creation aborted!!")
+        @$log.info 'type attribute for the layer directive is mandatory. Layer creation aborted!!'
         return
       @createGoogleLayer()
-      ##added by ML
+
       @$log.info('creating layer with '+scope.options+' and show '+scope.show)
       listeners = @setEvents @layer, scope, scope
       #@listener = google.maps.event.addListener @layer, 'click', (event)=>
@@ -21,22 +21,19 @@ angular.module("google-maps.directives.api.models.parent".ns())
         for eventName of scope.events
           @$log.info('eventname2 is: '+eventName)
           google.maps.event.addListener @layer, eventName, getEventHandler(eventName)  if scope.events.hasOwnProperty(eventName) and angular.isFunction(scope.events[eventName])
-
-
       #end
       @doShow = true
 
-      @doShow = @scope.show  if angular.isDefined(@attrs.show)
-      @layer.setMap @gMap  if @doShow and @gMap?
-      @scope.$watch("show", (newValue, oldValue) =>
+      @doShow = @scope.show if angular.isDefined(@attrs.show)
+      @gObject.setMap @gMap if @doShow and @gMap?
+      @scope.$watch 'show', (newValue, oldValue) =>
         if newValue isnt oldValue
           @doShow = newValue
           if newValue
-            @layer.setMap @gMap
+            @gObject.setMap @gMap
           else
-            @layer.setMap null
-      , true)
-
+            @gObject.setMap null
+      , true
       @scope.$watch("options", (newValue, oldValue) =>
         if newValue isnt oldValue
           @layer.setMap null
@@ -48,18 +45,16 @@ angular.module("google-maps.directives.api.models.parent".ns())
         @removeEvents listeners
         @layer.setMap null
 
-    createGoogleLayer: ()=>
+    createGoogleLayer: =>
       unless @attrs.options?
-        @layer = if @attrs.namespace == undefined then new google.maps[@attrs.type]()
+        @gObject = if @attrs.namespace == undefined then new google.maps[@attrs.type]()
         else new google.maps[@attrs.namespace][@attrs.type]()
       else
-        @layer = if@attrs.namespace == undefined then new google.maps[@attrs.type](@scope.options)
+        @gObject = if @attrs.namespace == undefined then new google.maps[@attrs.type](@scope.options)
         else new google.maps[@attrs.namespace][@attrs.type](@scope.options)
-        #if @scope.show then @layer.setMap @gMap ##dont do this too many maploads
 
-      if @layer? and @onLayerCreated?
-        fn = @onLayerCreated(@scope, @layer)
-        if fn
-          fn(@layer)
+      if @gObject? and @onLayerCreated?
+        @onLayerCreated(@scope, @gObject)? @gObject
+
   LayerParentModel
 ]
