@@ -55,7 +55,7 @@ angular.module("google-maps.directives.api.models.parent".ns())
       else
         @layer = if@attrs.namespace == undefined then new google.maps[@attrs.type](@scope.options)
         else new google.maps[@attrs.namespace][@attrs.type](@scope.options)
-        if @scope.show then @layer.setMap @gMap
+        #if @scope.show then @layer.setMap @gMap ##dont do this too many maploads
 
       if @layer? and @onLayerCreated?
         fn = @onLayerCreated(@scope, @layer)

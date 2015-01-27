@@ -223,7 +223,7 @@ angular.module("angular-google-maps-example", ["google-maps".ns()])
           id: 2,
           latitude: 15,
           longitude: 30,
-          showWindow: false,
+          showWindow: false
         },
         {
           id: 3,
@@ -285,6 +285,7 @@ angular.module("angular-google-maps-example", ["google-maps".ns()])
           latitude: 29.302567,
           longitude: -106.248779,
           onClicked: function(gMarker,eventName, model){
+              $log.info('mexiMarekr clicked');
 
           }
         },
@@ -293,6 +294,7 @@ angular.module("angular-google-maps-example", ["google-maps".ns()])
           latitude: 30.369913,
           longitude: -109.434814,
           onClicked: function(gMarker,eventName, model){
+              $log.info('mexiMarekr clicked');
 
           }
         },
@@ -301,7 +303,7 @@ angular.module("angular-google-maps-example", ["google-maps".ns()])
           latitude: 26.739478,
           longitude: -108.61084,
           onClicked: function(gMarker,eventName, model){
-
+              $log.info('mexiMarekr clicked');
           }
         }
       ],
@@ -616,6 +618,9 @@ angular.module("angular-google-maps-example", ["google-maps".ns()])
       longitude: -99.6680
     },
     options: { draggable: true },
+      onClicked: function(){
+          $log.info('stacismarker clicked');
+      },
     events: {
       dragend: function (marker, eventName, args) {
         $log.log('marker dragend');
