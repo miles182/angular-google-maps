@@ -8,7 +8,7 @@ angular.module('uiGmapgoogle-maps.directives.api.models.parent')
         return
       @createGoogleLayer()
 
-      @$log.error('creating layer with '+scope.options+' and show '+scope.show)
+      #@$log.error('creating layer with '+scope.options+' and show '+scope.show)
       listeners = @setEvents @gObject, scope, scope
       #@listener = google.maps.event.addListener @layer, 'click', (event)=>
       #  @$log.info("Click:"+event.infoWindowHtml)
